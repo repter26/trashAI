@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import Camera from './components/Camera.jsx'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
-import NavBar from './components/NavBar/NavBar.jsx'
-import OnBoarding from './components/OnBoarding/OnBoarding.jsx'
+import './App.css'
 
 function App() {
   // const [data, setData] = useState([]);
@@ -27,8 +26,11 @@ function App() {
 
   return (
     <>
-    <NavBar/>
-    <OnBoarding/>
+      <h1>Vite + React</h1>
+      <div className="card">
+          {data}
+      </div>
+      <Camera />
     </>
   )
 }
