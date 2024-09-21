@@ -6,9 +6,9 @@ function OnBoarding() {
   return (
     <>
       <div 
-        className="flex justify-center items-center h-screen bg-cover bg-center-top bg-repeat" 
-        style={{ backgroundImage: `url(${robotImg})` }}>
-        <h1 className="text-6xl text-white font-bold">Intelligent Trash Sorting</h1>
+        className="flex justify-center items-center"
+        >
+        <h1 className="my-64 ml-auto mr-10   text-6xl text-white font-bold">Intelligent Trash Sorting</h1>
       </div>
     </>
   );
