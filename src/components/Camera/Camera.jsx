@@ -52,14 +52,17 @@ const Camera = () => {
       setImageSrc(imageDataUrl); // Save the image for display
 
       try {
-        const response = await fetch("http://127.0.0.1:5000", {
-          method: "POST",
-          headers: {
-            "ngrok-skip-browser-warning": "anything",
-          },
-          body: imageDataUrl, // The FormData object contains the file
-          // No need to set 'Content-Type', the browser automatically sets the correct boundary for multipart forms
-        });
+        const response = await fetch(
+          "https://d51d-2001-569-58a1-8500-7cc8-ef3c-b866-f059.ngrok-free.app/",
+          {
+            method: "POST",
+            headers: {
+              "ngrok-skip-browser-warning": "anything",
+            },
+            body: imageDataUrl, // The FormData object contains the file
+            // No need to set 'Content-Type', the browser automatically sets the correct boundary for multipart forms
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Error uploading the image");
