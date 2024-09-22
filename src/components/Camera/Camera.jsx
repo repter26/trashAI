@@ -5,7 +5,6 @@ const Camera = () => {
   const canvasRef = useRef(null);
   const [imageSrc, setImageSrc] = useState(null); // To store the captured image
   const [data, setData] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [responseMessage, setResponseMessage] = useState("");
 
   useEffect(() => {
@@ -60,7 +59,6 @@ const Camera = () => {
               "ngrok-skip-browser-warning": "anything",
             },
             body: imageDataUrl, // The FormData object contains the file
-            // No need to set 'Content-Type', the browser automatically sets the correct boundary for multipart forms
           }
         );
 
@@ -78,22 +76,19 @@ const Camera = () => {
   };
 
   return (
-    <div>
-      <h2>Webcam Feed</h2>
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        style={{ width: "600px", height: "600px" }}
-      />
-      <button onClick={takePicture} style={{ marginTop: "10px" }}>
-        Take Picture
-      </button>
+    <div className="flex flex-col justify-center align-center">
+      <h2>Trash Screen</h2>
+      <video ref={videoRef} autoPlay playsInline className="w-auto" />
+      <button onClick={takePicture}>Take Picture</button>
+      <div className="relative mt-6">
+        <div className="absolute inset-0 w-48 h-48 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-50 blur-xl animate-pulse"></div>
+        <div className="w-48 h-48 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulseCircle"></div>
+      </div>
       <canvas ref={canvasRef} style={{ display: "none" }} />{" "}
       {/* Hidden canvas */}
       {/* Display the captured image */}
       {imageSrc && (
-        <div>
+        <div className="flex flex-col items-center mt-4">
           <h3>Captured Image:</h3>
           <img
             src={imageSrc}
@@ -101,6 +96,8 @@ const Camera = () => {
             style={{ maxWidth: "500px", marginTop: "10px" }}
           />
           <p>{data}</p>
+
+          {/* Siri-like Response Circle */}
         </div>
       )}
     </div>
