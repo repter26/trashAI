@@ -6,7 +6,7 @@ import NavBar from "../NavBar/NavBar";
 function OnBoarding() {
   return (
     <div
-      className="h-screen bg-cover bg-center-top"
+      className="h-screen bg-cover bg-center-top md:bg-[center_top_-30px] lg:bg-[center_top_-100px] xl:bg-[center_top_-130px] 2xl:bg-[center_top_-160px]"
       style={{ backgroundImage: `url(${robotImg})` }}
     >
       <NavBar />

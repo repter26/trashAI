@@ -5,11 +5,11 @@ const Camera = () => {
   const canvasRef = useRef(null);
   const [imageSrc, setImageSrc] = useState(null); // To store the captured image
   const [data, setData] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [responseMessage, setResponseMessage] = useState("");
+  const [isMovementDetected, setIsMovementDetected] = useState(false);
+  const [lastMovementTime, setLastMovementTime] = useState(0);
 
   useEffect(() => {
-    // Access the webcam stream
     const getWebcamStream = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -20,12 +20,12 @@ const Camera = () => {
         }
       } catch (err) {
         console.error("Error accessing the webcam: ", err);
+        setResponseMessage("Error accessing the webcam: " + err.message);
       }
     };
 
     getWebcamStream();
 
-    // Cleanup: stop the video stream when the component is unmounted
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
         const tracks = videoRef.current.srcObject.getTracks();
@@ -33,6 +33,62 @@ const Camera = () => {
       }
     };
   }, []);
+
+  // Function to detect movement by comparing video frames
+  const detectMovement = (prevImageData, currentImageData) => {
+    if (!prevImageData || !currentImageData) return false;
+
+    const pixelDiffThreshold = 100; // Sensitivity for movement detection
+    let diffCount = 0;
+
+    for (let i = 0; i < prevImageData.length; i += 4) {
+      const rDiff = Math.abs(prevImageData[i] - currentImageData[i]);
+      const gDiff = Math.abs(prevImageData[i + 1] - currentImageData[i + 1]);
+      const bDiff = Math.abs(prevImageData[i + 2] - currentImageData[i + 2]);
+
+      if (rDiff > pixelDiffThreshold || gDiff > pixelDiffThreshold || bDiff > pixelDiffThreshold) {
+        diffCount++;
+      }
+
+      if (diffCount > 100) { // Movement threshold
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Capture a picture 3 seconds after movement is detected
+  useEffect(() => {
+    let prevImageData = null;
+    const interval = setInterval(() => {
+      if (canvasRef.current && videoRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        ctx.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+        const currentImageData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height).data;
+
+        if (prevImageData && detectMovement(prevImageData, currentImageData)) {
+          setIsMovementDetected(true);
+          setLastMovementTime(Date.now());
+        }
+
+        prevImageData = currentImageData;
+      }
+    }, 100); // Check every 100ms for movement
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Wait 3 seconds after movement detection to take a picture
+  useEffect(() => {
+    if (isMovementDetected) {
+      const timeSinceLastMovement = Date.now() - lastMovementTime;
+
+      if (timeSinceLastMovement >= 3000) {
+        takePicture(); // Call the takePicture function after 3 seconds
+        setIsMovementDetected(false); // Reset movement detection
+      }
+    }
+  }, [isMovementDetected, lastMovementTime]);
 
   const takePicture = async () => {
     if (videoRef.current && canvasRef.current) {
@@ -47,7 +103,7 @@ const Camera = () => {
       // Draw the current video frame onto the canvas
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Convert the canvas content to a data URL (image)
+      // Convert the canvas content to a data URL (image in base64)
       const imageDataUrl = canvas.toDataURL("image/png");
       setImageSrc(imageDataUrl); // Save the image for display
 
@@ -57,19 +113,18 @@ const Camera = () => {
           {
             method: "POST",
             headers: {
+              "Content-Type": "application/json",
               "ngrok-skip-browser-warning": "anything",
             },
-            body: imageDataUrl, // The FormData object contains the file
-            // No need to set 'Content-Type', the browser automatically sets the correct boundary for multipart forms
+            body: JSON.stringify({ image: imageDataUrl }), // Send image as JSON
           }
         );
 
         if (!response.ok) {
           throw new Error("Error uploading the image");
         } else {
-          let answer = await response.text();
-          console.log(answer);
-          setData(answer);
+          const answer = await response.text();
+          setData(answer); // Store the response data
         }
       } catch (error) {
         setResponseMessage("Error: " + error.message);
@@ -86,12 +141,8 @@ const Camera = () => {
         playsInline
         style={{ width: "600px", height: "600px" }}
       />
-      <button onClick={takePicture} style={{ marginTop: "10px" }}>
-        Take Picture
-      </button>
-      <canvas ref={canvasRef} style={{ display: "none" }} />{" "}
-      {/* Hidden canvas */}
-      {/* Display the captured image */}
+      <canvas ref={canvasRef} style={{ display: "none" }} /> {/* Hidden canvas */}
+      
       {imageSrc && (
         <div>
           <h3>Captured Image:</h3>
@@ -103,6 +154,7 @@ const Camera = () => {
           <p>{data}</p>
         </div>
       )}
+      {responseMessage && <p>{responseMessage}</p>} {/* Error or response messages */}
     </div>
   );
 };
