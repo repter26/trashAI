@@ -46,11 +46,16 @@ const Camera = () => {
       const gDiff = Math.abs(prevImageData[i + 1] - currentImageData[i + 1]);
       const bDiff = Math.abs(prevImageData[i + 2] - currentImageData[i + 2]);
 
-      if (rDiff > pixelDiffThreshold || gDiff > pixelDiffThreshold || bDiff > pixelDiffThreshold) {
+      if (
+        rDiff > pixelDiffThreshold ||
+        gDiff > pixelDiffThreshold ||
+        bDiff > pixelDiffThreshold
+      ) {
         diffCount++;
       }
 
-      if (diffCount > 100) { // Movement threshold
+      if (diffCount > 100) {
+        // Movement threshold
         return true;
       }
     }
@@ -63,8 +68,19 @@ const Camera = () => {
     const interval = setInterval(() => {
       if (canvasRef.current && videoRef.current) {
         const ctx = canvasRef.current.getContext("2d");
-        ctx.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-        const currentImageData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height).data;
+        ctx.drawImage(
+          videoRef.current,
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        );
+        const currentImageData = ctx.getImageData(
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        ).data;
 
         if (prevImageData && detectMovement(prevImageData, currentImageData)) {
           setIsMovementDetected(true);
@@ -141,10 +157,10 @@ const Camera = () => {
         playsInline
         style={{ width: "600px", height: "600px" }}
       />
-      <canvas ref={canvasRef} style={{ display: "none" }} /> {/* Hidden canvas */}
-      
+      <canvas ref={canvasRef} style={{ display: "none" }} />{" "}
+      {/* Hidden canvas */}
       {imageSrc && (
-        <div>
+        <div className="flex flex-col items-center mt-4">
           <h3>Captured Image:</h3>
           <img
             src={imageSrc}
@@ -152,9 +168,12 @@ const Camera = () => {
             style={{ maxWidth: "500px", marginTop: "10px" }}
           />
           <p>{data}</p>
+
+          {/* Siri-like Response Circle */}
         </div>
       )}
-      {responseMessage && <p>{responseMessage}</p>} {/* Error or response messages */}
+      {responseMessage && <p>{responseMessage}</p>}{" "}
+      {/* Error or response messages */}
     </div>
   );
 };
