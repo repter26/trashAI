@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from "react";
 
 const Camera = () => {
   const videoRef = useRef(null);
@@ -6,13 +6,15 @@ const Camera = () => {
   const [imageSrc, setImageSrc] = useState(null); // To store the captured image
   const [data, setData] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [responseMessage, setResponseMessage] = useState('');
+  const [responseMessage, setResponseMessage] = useState("");
 
   useEffect(() => {
     // Access the webcam stream
     const getWebcamStream = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -36,7 +38,7 @@ const Camera = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext("2d");
 
       // Set canvas width and height to match the video dimensions
       canvas.width = video.videoWidth;
@@ -46,48 +48,56 @@ const Camera = () => {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // Convert the canvas content to a data URL (image)
-      const imageDataUrl = canvas.toDataURL('image/png');
+      const imageDataUrl = canvas.toDataURL("image/png");
       setImageSrc(imageDataUrl); // Save the image for display
 
       try {
-        const response = await fetch('https://b1b3-209-87-29-242.ngrok-free.app', {
-          method: 'POST',
-          headers: {"ngrok-skip-browser-warning": "adjfkshdflkasjdlgkajsdlkg"},
+        const response = await fetch("http://127.0.0.1:5000", {
+          method: "POST",
+          headers: {
+            "ngrok-skip-browser-warning": "anything",
+          },
           body: imageDataUrl, // The FormData object contains the file
           // No need to set 'Content-Type', the browser automatically sets the correct boundary for multipart forms
         });
-  
+
         if (!response.ok) {
-          throw new Error('Error uploading the image');
+          throw new Error("Error uploading the image");
         } else {
-          setData(response.json);
+          let answer = await response.text();
+          console.log(answer);
+          setData(answer);
         }
-  
-        const data = await response.json(); // Assuming the response returns JSON
-        setResponseMessage('Image uploaded successfully! Response: ' + JSON.stringify(data));
       } catch (error) {
-        setResponseMessage('Error: ' + error.message);
+        setResponseMessage("Error: " + error.message);
       }
     }
-  };  
+  };
 
   return (
     <div>
       <h2>Webcam Feed</h2>
-      <video ref={videoRef} autoPlay playsInline style={{ width: '600px', height: '600px' }} />
-
-      <button onClick={takePicture} style={{ marginTop: '10px' }}>
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        style={{ width: "600px", height: "600px" }}
+      />
+      <button onClick={takePicture} style={{ marginTop: "10px" }}>
         Take Picture
       </button>
-
-      <canvas ref={canvasRef} style={{ display: 'none' }} /> {/* Hidden canvas */}
-
+      <canvas ref={canvasRef} style={{ display: "none" }} />{" "}
+      {/* Hidden canvas */}
       {/* Display the captured image */}
       {imageSrc && (
         <div>
           <h3>Captured Image:</h3>
-          <img src={imageSrc} alt="Captured" style={{ maxWidth: '500px', marginTop: '10px' }} />
-          <p>{imageSrc}</p>
+          <img
+            src={imageSrc}
+            alt="Captured"
+            style={{ maxWidth: "500px", marginTop: "10px" }}
+          />
+          <p>{data}</p>
         </div>
       )}
     </div>
